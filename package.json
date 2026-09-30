@@ -1,0 +1,18 @@
+{
+  "name": "yanmian-prototype",
+  "version": "0.2.0",
+  "private": true,
+  "description": "研面：本地交互原型与回归验证",
+  "scripts": {
+    "start": "python tools/create_daily_log.py && serve . -l tcp://127.0.0.1:5173 --no-clipboard",
+    "test": "node --test tests/domain.test.cjs",
+    "test:browser": "playwright test"
+  },
+  "dependencies": {
+    "bcryptjs": "3.0.2"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.55.1",
+    "serve": "14.2.6"
+  }
+}

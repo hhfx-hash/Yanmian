@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>调试页面</title>
+</head>
+<body>
+  <h1>元素诊断</h1>
+  <pre id="output"></pre>
+
+  <script>
+    const log = [];
+    const $ = s => document.querySelector(s);
+
+    function checkElement(selector) {
+      const el = $(selector);
+      const exists = el !== null;
+      log.push(`${selector}: ${exists ? '✓ 存在' : '✗ 不存在'}`);
+      if (!exists) {
+        console.error(`缺失元素: ${selector}`);
+      }
+      return exists;
+    }
+
+    // 检查所有 app.js 中使用的元素
+    const elements = [
+      '.auth-tab',
+      '#loginForm',
+      '#registerForm',
+      '#forgotPassword',
+      '#majorOptions',
+      '#authView',
+      '#appView',
+      '#sidebarName',
+      '#sidebarEmail',
+      '#sidebarAvatar',
+      '#topAvatar',
+      '.nav-item',
+      '#logoutButton',
+      '#openSidebar',
+      '#closeSidebar',
+      '#mainContent'
+    ];
+
+    elements.forEach(checkElement);
+
+    document.getElementById('output').textContent = log.join('\n');
+  </script>
+</body>
+</html>
