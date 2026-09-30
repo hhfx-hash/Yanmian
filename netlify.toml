@@ -1,0 +1,13 @@
+[build]
+  publish = "."
+  command = ""
+
+[[redirects]]
+  from = "/"
+  to = "/index-supabase.html"
+  status = 200
+
+[[redirects]]
+  from = "/*"
+  to = "/:splat"
+  status = 200
