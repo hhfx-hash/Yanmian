@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Supabase 连接测试</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .test-container {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h1 { color: #333; margin-top: 0; }
+    .test-item {
+      padding: 15px;
+      margin: 10px 0;
+      border-left: 4px solid #ddd;
+      background: #f9f9f9;
+    }
+    .test-item.loading {
+      border-color: #ffa500;
+    }
+    .test-item.success {
+      border-color: #4caf50;
+      background: #f1f8f4;
+    }
+    .test-item.error {
+      border-color: #f44336;
+      background: #fef5f5;
+    }
+    .test-title {
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+    .test-detail {
+      font-family: 'Consolas', monospace;
+      font-size: 13px;
+      color: #666;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    button {
+      background: #4caf50;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-top: 20px;
+    }
+    button:hover {
+      background: #45a049;
+    }
+  </style>
+</head>
+<body>
+  <div class="test-container">
+    <h1>🔍 Supabase 连接诊断</h1>
+    <div id="tests"></div>
+    <button onclick="runTests()">重新测试</button>
+  </div>
+
+  <script src="supabase.min.js"></script>
+  <script>
+    const SUPABASE_URL = 'https://drhgffbacbrlobfkyeuc.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRyaGdmZmJhY2JybG9iZmt5ZXVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA3NDc0ODMsImV4cCI6MjEwNjMyMzQ4M30.jDlOEKTw1pwUP_d1MvFLFlSNpel3-oViiW-2BoRHmqw';
+
+    const testsDiv = document.getElementById('tests');
+
+    function addTest(id, title) {
+      const div = document.createElement('div');
+      div.id = id;
+      div.className = 'test-item loading';
+      div.innerHTML = `
+        <div class="test-title">${title}</div>
+        <div class="test-detail">测试中...</div>
+      `;
+      testsDiv.appendChild(div);
+      return div;
+    }
+
+    function updateTest(id, success, detail) {
+      const div = document.getElementById(id);
+      div.className = `test-item ${success ? 'success' : 'error'}`;
+      div.querySelector('.test-detail').textContent = detail;
+    }
+
+    async function runTests() {
+      testsDiv.innerHTML = '';
+
+      // 测试 1: Supabase SDK 加载
+      const test1 = addTest('test1', '✓ Supabase SDK 加载检查');
+      if (window.supabase) {
+        updateTest('test1', true, '✅ SDK 已成功加载');
+      } else {
+        updateTest('test1', false, '❌ SDK 未加载');
+        return;
+      }
+
+      // 测试 2: 创建客户端
+      const test2 = addTest('test2', '✓ Supabase 客户端初始化');
+      try {
+        const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        updateTest('test2', true, `✅ 客户端已创建\nURL: ${SUPABASE_URL}`);
+      } catch (error) {
+        updateTest('test2', false, `❌ 客户端创建失败\n${error.message}`);
+        return;
+      }
+
+      // 测试 3: 网络连接
+      const test3 = addTest('test3', '✓ Supabase 服务器连接');
+      try {
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/`, {
+          method: 'GET',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+          }
+        });
+
+        if (response.ok || response.status === 404) {
+          updateTest('test3', true, `✅ 服务器连接成功\nHTTP 状态: ${response.status}`);
+        } else {
+          updateTest('test3', false, `⚠️ 服务器响应异常\nHTTP 状态: ${response.status}`);
+        }
+      } catch (error) {
+        updateTest('test3', false, `❌ 无法连接到 Supabase 服务器\n错误: ${error.message}\n\n可能原因:\n1. Supabase 项目已暂停（7天不活动会自动暂停）\n2. 网络限制或防火墙阻止\n3. DNS 解析失败`);
+        return;
+      }
+
+      // 测试 4: 数据库查询
+      const test4 = addTest('test4', '✓ 数据库查询测试');
+      try {
+        const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const { data, error } = await client.from('user_profiles').select('count').limit(1);
+
+        if (error) {
+          updateTest('test4', false, `❌ 查询失败\n${error.message}\n${error.details || ''}`);
+        } else {
+          updateTest('test4', true, `✅ 数据库连接正常\n可以访问 user_profiles 表`);
+        }
+      } catch (error) {
+        updateTest('test4', false, `❌ 查询异常\n${error.message}`);
+      }
+
+      // 测试 5: 认证功能
+      const test5 = addTest('test5', '✓ 认证服务测试');
+      try {
+        const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const { data, error } = await client.auth.getSession();
+
+        if (error && error.message !== 'Auth session missing!') {
+          updateTest('test5', false, `❌ 认证服务异常\n${error.message}`);
+        } else {
+          updateTest('test5', true, `✅ 认证服务正常\n${data.session ? '已登录' : '未登录'}`);
+        }
+      } catch (error) {
+        updateTest('test5', false, `❌ 认证服务异常\n${error.message}`);
+      }
+    }
+
+    // 页面加载时自动运行测试
+    window.addEventListener('DOMContentLoaded', runTests);
+  </script>
+</body>
+</html>
