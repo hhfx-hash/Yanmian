@@ -1,92 +1,66 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#315bca" />
-    <title>研面 · 复试面试训练</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <title>研面 - 面试练习系统（云端版）</title>
     <link rel="stylesheet" href="styles.css?v=20260930" />
   </head>
   <body>
-    <div id="authView" class="auth-view">
-      <div class="auth-glow auth-glow-a"></div>
-      <div class="auth-glow auth-glow-b"></div>
-      <main class="auth-card">
-        <div class="brand-mark"><span>研</span></div>
-        <p class="eyebrow">保研 · 考研复试训练</p>
-        <h1>把每一次开口，<br /><em>练成你的底气。</em></h1>
-        <p class="auth-intro">面向保研与考研复试的专注练习空间。<br />现在开始，找到你的面试节奏。</p>
-        <div class="auth-tabs" role="tablist">
-          <button class="auth-tab is-active" data-auth-tab="login">登录</button>
-          <button class="auth-tab" data-auth-tab="register">注册</button>
-        </div>
-        <form id="loginForm" class="auth-form">
-          <label>邮箱<input name="email" type="email" placeholder="you@example.com" required /></label>
-          <label>密码<input name="password" type="password" placeholder="请输入密码" required /></label>
-          <div class="form-row form-row-between"><label class="checkbox-label"><input type="checkbox" checked disabled /> <span>本机保留登录状态</span></label><button type="button" class="text-button" id="forgotPassword">忘记密码？</button></div>
-          <button class="primary-button full-width" type="submit">登录研面 <span>→</span></button>
-        </form>
-        <form id="registerForm" class="auth-form is-hidden"><label>称呼<input name="name" maxlength="30" placeholder="例如：林同学" required /></label><label>本科专业<input name="major" list="majorOptions" maxlength="80" placeholder="选择或输入完整的本科专业名称" required /></label>
-          <label>邮箱<input name="email" type="email" placeholder="you@example.com" required /></label>
-          <label>设置密码<input name="password" type="password" placeholder="至少 8 位字符" minlength="8" required /></label>
-          <p class="auth-note">注册后即可开始使用。数据保存在云端，支持跨设备访问。</p>
-          <button class="primary-button full-width" type="submit">创建账号 <span>→</span></button>
-        </form>
-        <p class="auth-note">研面面试训练平台 · 数据云端存储，支持跨设备访问</p>
-      </main>
-      <div class="auth-footer"><span>研面 · 让准备更有方向</span><span>中文 · 简洁 · 专注</span></div>
-    </div>
+    <div id="app"></div>
 
-    <div id="appView" class="app-view is-hidden">
-      <aside class="sidebar">
-        <div class="sidebar-top">
-          <div class="brand-lockup"><div class="brand-mark small"><span>研</span></div><div><strong>研面</strong><span>面试训练空间</span></div></div>
-          <button class="mobile-close" id="closeSidebar" aria-label="关闭菜单">×</button>
-          <nav class="main-nav" aria-label="主导航">
-            <button class="nav-item is-active" data-view="dashboard"><span class="nav-icon">⌂</span>工作台</button>
-            <button class="nav-item" data-view="practice"><span class="nav-icon">◉</span>开始练习</button>
-            <button class="nav-item" data-view="bank"><span class="nav-icon">▤</span>我的题库</button>
-            <button class="nav-item" data-view="records"><span class="nav-icon">◷</span>训练记录</button>
-            <button class="nav-item admin-only is-hidden" data-view="admin"><span class="nav-icon">⚙</span>管理后台<span id="pendingBadge" class="nav-badge">0</span></button>
-          </nav>
-        </div>
-        <div class="sidebar-bottom">
-          <div class="mini-tip"><span class="tip-spark">✦</span><div><strong>今日小提醒</strong><p>先说清楚，再说精彩。</p></div></div>
-          <div class="profile-menu"><div class="avatar" id="sidebarAvatar">林</div><div class="profile-copy"><strong id="sidebarName">林同学</strong><span id="sidebarEmail">demo@yanmian.local</span></div><button id="logoutButton" class="icon-button" aria-label="退出登录">↪</button></div>
-        </div>
-      </aside>
+    <!-- Supabase JS SDK (本地) -->
+    <script src="supabase.min.js"></script>
 
-      <div class="main-shell">
-        <header class="topbar"><button id="openSidebar" class="mobile-menu" aria-label="打开菜单">☰</button><div class="topbar-title"><span id="pageKicker">今天也要保持状态</span><h2 id="pageTitle">工作台</h2></div><div class="topbar-actions"><button class="avatar top-avatar" id="topAvatar">林</button></div></header>
-        <div class="prototype-banner">云端版 · 数据同步到 Supabase</div><main id="mainContent" class="content-area"></main>
-      </div>
-    </div>
+    <!-- 应用脚本 -->
+    <script src="supabase-config.js"></script>
+    <script src="supabase-service.js"></script>
+    <script src="domain-supabase.js"></script>
+    <script src="views-supabase.js"></script>
+    <script src="app-supabase-main.js"></script>
 
-    <div id="modalRoot"></div>
-    <div id="toastRoot" class="toast-root"></div>
-    <datalist id="majorOptions"></datalist>
-    <script src="bcrypt.min.js?v=20260930"></script>
     <script>
-      // bcryptjs 库导出的是 dcodeIO.bcrypt,需要映射到全局 bcrypt
-      if (typeof dcodeIO !== 'undefined' && dcodeIO.bcrypt) {
-        window.bcrypt = dcodeIO.bcrypt;
-      } else {
-        console.error('[加载错误] bcrypt 库未正确加载');
-      }
-    </script>
-    <script src="domain.js?v=20260930"></script>
-    <script src="views.js?v=20260930"></script>
-    <script src="app.js?v=20260930"></script>
-    <script>
-      // 确保 DOM 完全加载后再初始化
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
-      } else {
-        init();
-      }
+      // 确保 DOM 加载完成后初始化
+      document.addEventListener('DOMContentLoaded', async () => {
+        console.log('[Supabase 版本] 开始初始化');
+
+        // 检查依赖
+        if (!window.supabase) {
+          console.error('[加载错误] Supabase SDK 未正确加载');
+          document.getElementById('app').innerHTML = `
+            <div style="padding: 40px; text-align: center;">
+              <h2>加载失败</h2>
+              <p>Supabase SDK 加载失败，请检查网络连接后刷新页面。</p>
+            </div>
+          `;
+          return;
+        }
+
+        if (!window.YanmianDomain) {
+          console.error('[加载错误] Domain 层未正确加载');
+          return;
+        }
+
+        if (!window.appSupabase) {
+          console.error('[加载错误] App 层未正确加载');
+          return;
+        }
+
+        // 初始化应用
+        try {
+          await window.appSupabase.init();
+          console.log('[Supabase 版本] 初始化成功');
+        } catch (error) {
+          console.error('[初始化失败]', error);
+          document.getElementById('app').innerHTML = `
+            <div style="padding: 40px; text-align: center;">
+              <h2>初始化失败</h2>
+              <p>${error.message}</p>
+              <button onclick="location.reload()">重新加载</button>
+            </div>
+          `;
+        }
+      });
     </script>
   </body>
 </html>
