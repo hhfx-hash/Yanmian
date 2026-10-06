@@ -153,7 +153,18 @@ class AppSupabase {
 
       if (result.success) {
         console.log('[注册成功]', result.user.email);
-        alert('注册成功！已为您初始化9道默认题目');
+
+        // 自动创建默认题目
+        submitBtn.textContent = '正在初始化题库...';
+        try {
+          await SupabaseService.initDefaultQuestions();
+          console.log('[默认题目创建成功]');
+          alert('注册成功！已为您初始化9道默认题目');
+        } catch (initError) {
+          console.error('[默认题目创建失败]', initError);
+          alert('注册成功！但默认题目创建失败，您可以手动添加题目');
+        }
+
         this.showMainView();
       } else {
         alert('注册失败：' + result.error);
@@ -162,7 +173,14 @@ class AppSupabase {
       }
     } catch (error) {
       console.error('[注册异常]', error);
-      alert('注册失败：' + error.message);
+
+      // 提供更友好的错误提示
+      let errorMsg = '注册失败：' + error.message;
+      if (error.message.includes('fetch')) {
+        errorMsg += '\n\n请确保网络畅通（国内用户需要稳定的网络环境）';
+      }
+
+      alert(errorMsg);
       submitBtn.disabled = false;
       submitBtn.textContent = '注册';
     }

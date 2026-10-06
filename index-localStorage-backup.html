@@ -19,7 +19,6 @@
         <p class="eyebrow">保研 · 考研复试训练</p>
         <h1>把每一次开口，<br /><em>练成你的底气。</em></h1>
         <p class="auth-intro">面向保研与考研复试的专注练习空间。<br />现在开始，找到你的面试节奏。</p>
-        <p class="auth-note" style="color: #f59e0b; font-weight: 500; margin-top: 16px;">📡 云端版本需要稳定网络连接<br />国内用户请确保网络畅通</p>
         <div class="auth-tabs" role="tablist">
           <button class="auth-tab is-active" data-auth-tab="login">登录</button>
           <button class="auth-tab" data-auth-tab="register">注册</button>
@@ -36,7 +35,7 @@
           <p class="auth-note">注册后即可开始使用。数据保存在云端，支持跨设备访问。</p>
           <button class="primary-button full-width" type="submit">创建账号 <span>→</span></button>
         </form>
-        <p class="auth-note">研面面试训练平台 · 数据云端存储 · <a href="supabase-test.html" style="color: #315bca;">连接诊断</a></p>
+        <p class="auth-note">研面面试训练平台 · 数据云端存储，支持跨设备访问</p>
       </main>
       <div class="auth-footer"><span>研面 · 让准备更有方向</span><span>中文 · 简洁 · 专注</span></div>
     </div>
@@ -69,65 +68,25 @@
     <div id="modalRoot"></div>
     <div id="toastRoot" class="toast-root"></div>
     <datalist id="majorOptions"></datalist>
-
-    <!-- Supabase JS SDK (本地) -->
-    <script src="supabase.min.js"></script>
-
-    <!-- 应用脚本 -->
-    <script src="supabase-config.js"></script>
-    <script src="supabase-service.js"></script>
-    <script src="domain-supabase.js"></script>
-    <script src="views-supabase.js"></script>
-    <script src="app-supabase-main.js"></script>
-
+    <script src="bcrypt.min.js?v=20260930"></script>
     <script>
-      // 确保 DOM 加载完成后初始化
-      document.addEventListener('DOMContentLoaded', async () => {
-        console.log('[Supabase 版本] 开始初始化');
-
-        // 检查依赖
-        if (!window.supabase) {
-          console.error('[加载错误] Supabase SDK 未正确加载');
-          document.getElementById('authView').innerHTML = `
-            <div style="padding: 40px; text-align: center; max-width: 500px; margin: 0 auto;">
-              <h2>加载失败</h2>
-              <p>Supabase SDK 加载失败，请检查网络连接后刷新页面。</p>
-              <p style="color: #f59e0b; margin-top: 16px;">国内用户需要稳定的网络连接访问云端服务</p>
-              <a href="supabase-test.html" style="color: #315bca; text-decoration: underline;">运行连接诊断</a>
-            </div>
-          `;
-          return;
-        }
-
-        if (!window.YanmianDomain) {
-          console.error('[加载错误] Domain 层未正确加载');
-          return;
-        }
-
-        if (!window.appSupabase) {
-          console.error('[加载错误] App 层未正确加载');
-          return;
-        }
-
-        // 初始化应用
-        try {
-          await window.appSupabase.init();
-          console.log('[Supabase 版本] 初始化成功');
-        } catch (error) {
-          console.error('[初始化失败]', error);
-          document.getElementById('authView').innerHTML = `
-            <div style="padding: 40px; text-align: center; max-width: 500px; margin: 0 auto;">
-              <h2>🔌 连接失败</h2>
-              <p style="margin: 20px 0;">${error.message}</p>
-              <p style="color: #666;">请确保网络畅通（国内用户需要稳定的网络环境）</p>
-              <div style="margin-top: 30px;">
-                <button onclick="location.reload()" style="padding: 12px 24px; background: #315bca; color: white; border: none; border-radius: 8px; cursor: pointer; margin-right: 10px;">重新加载</button>
-                <a href="supabase-test.html" style="padding: 12px 24px; background: #f3f4f6; color: #333; border-radius: 8px; text-decoration: none; display: inline-block;">连接诊断</a>
-              </div>
-            </div>
-          `;
-        }
-      });
+      // bcryptjs 库导出的是 dcodeIO.bcrypt,需要映射到全局 bcrypt
+      if (typeof dcodeIO !== 'undefined' && dcodeIO.bcrypt) {
+        window.bcrypt = dcodeIO.bcrypt;
+      } else {
+        console.error('[加载错误] bcrypt 库未正确加载');
+      }
+    </script>
+    <script src="domain.js?v=20260930"></script>
+    <script src="views.js?v=20260930"></script>
+    <script src="app.js?v=20260930"></script>
+    <script>
+      // 确保 DOM 完全加载后再初始化
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+      } else {
+        init();
+      }
     </script>
   </body>
 </html>
