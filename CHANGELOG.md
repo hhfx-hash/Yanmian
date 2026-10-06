@@ -2,6 +2,46 @@
 
 ## 2026-10-06
 
+### 修复 Supabase 数据未保存问题 ✅
+
+**问题发现**：
+- 用户报告注册的账号没有保存到 Supabase 的 `user_profiles` 表
+- 训练记录也没有保存到 `practice_records` 表
+- Supabase 数据库中完全没有数据
+- 但在网页管理员账号中可以看到数据（说明数据在本地 localStorage）
+
+**根本原因**：
+- Netlify 部署的网站实际加载的是 `index.html`（localStorage 本地版）
+- 而不是 `index-supabase.html`（Supabase 云端版）
+- 虽然配置了 netlify.toml 重定向，但浏览器缓存导致加载的还是旧版本
+
+**解决方案**：
+1. 将 `index.html` 重命名为 `index-localStorage.html`（保留本地版本作为备份）
+2. 将 `index-supabase.html` 重命名为 `index.html`（云端版作为默认版本）
+3. 简化 `netlify.toml`，移除重定向配置
+4. 提交并推送到 GitHub (commit: f63cab3)
+
+**文件变更**：
+```
+index.html                 → index-localStorage.html (本地版)
+index-supabase.html       → index.html (云端版，现为默认)
+netlify.toml              简化配置
+```
+
+**技术细节**：
+- 云端版加载：`app-supabase-main.js` + `domain-supabase.js` + `views-supabase.js`
+- 本地版加载：`app.js` + `domain.js` + `views.js`
+- 云端版使用 Supabase SDK 连接 PostgreSQL 数据库
+- 本地版使用浏览器 localStorage 存储
+
+**等待验证**：
+- ⏳ Netlify 自动部署中（1-2 分钟）
+- 部署完成后访问 https://yanmian.netlify.app/
+- 重新测试注册功能，确认数据保存到 Supabase
+- 在 Supabase Table Editor 中验证数据
+
+---
+
 ### Netlify 部署问题排查
 
 **问题描述**：
@@ -11,9 +51,7 @@
 **解决方案**：
 1. 切换到 Netlify 部署方案（无需验证码，直接用 GitHub 登录）
 2. 发现部署问题：Netlify 从 `main` 分支部署，但用户当时在 `gh-pages` 分支
-3. 创建 `netlify.toml` 配置文件：
-   - 设置根目录为发布目录
-   - 配置根路径 `/` 重定向到 `/index-supabase.html`
+3. 创建 `netlify.toml` 配置文件
 4. 已提交配置到 GitHub (commit: 1f1a948)
 
 **部署结果**：
@@ -22,17 +60,6 @@
 **验证完成**：
 - ✅ https://yanmian.netlify.app/ 可正常访问
 - ✅ Netlify 自动检测到 GitHub push 并触发部署
-- ✅ netlify.toml 配置生效，根路径正确重定向到 index-supabase.html
-
-**技术要点**：
-- Netlify 会自动监听 GitHub 仓库的 push 事件
-- 配置文件 `netlify.toml` 确保了正确的路由和发布目录
-- 从 push 到部署完成约需 1-2 分钟
-
-**下一步**：
-- 测试云端版本所有功能（注册、登录、题库、练习、AI 生成）
-- 确认 Supabase 数据库连接正常
-- 收集用户反馈进行优化
 
 ---
 
